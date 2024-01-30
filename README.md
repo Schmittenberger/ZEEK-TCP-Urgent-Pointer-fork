@@ -1,7 +1,4 @@
 <h1 align="center">
-
-[![Zeek Logo](https://zeek.org/wp-content/uploads/2020/04/zeek-logo-without-text.png)](https://www.zeek.org)
-
  Zeek fork with TCP Urgent Pointer and IP Reserved Bit
 
 </h1><h4 align="center">
@@ -16,14 +13,16 @@ A ***complicated*** framework for network traffic analysis and security monitori
 </h4>
 
 
-Key Features
+Why this fork? 
 --------------
-* This Zeek fork adds the TCP Urgent Pointer to the header, as well as the Reserved Bit field to the IPv4 header
+* This Zeek fork adds the TCP Urgent Pointer to the header, as well as the Reserved Bit field to the IPv4 header. A zeek plugin could add the same functionality, but as no proper documentation (with relevant examples! Don't tell me to 'just read the source code' - source code is not documentation!) on writing plugins exists, and after existing third party plugins not compiling on their latest state, it was counterintuitivly faster to modify the source code.
+
+* I use this fork together with my Zeek scripts to detect covert channels on IPv4 and TCP protocols. See [Zeek-CCgen](https://github.com/Schmittenberger/Zeek-CCgen.v2).
 
 Getting Started
 ---------------
 
-The best place to find information about getting started with Zeek is [www.zeek.org](https://www.zeek.org), specifically the sparse
+The place to find information about getting started with Zeek is [www.zeek.org](https://www.zeek.org), specifically the sparse
 [documentation](https://www.zeek.org/documentation/index.html) section. On the web site you can also find tutorials on getting Zeek set up. Unfortunatly, not a lot of code examples or well written documentation is available for Zeek. 
 
 Clone the master git repository:
@@ -31,11 +30,17 @@ Clone the master git repository:
 `git clone --recursive https://github.com/Schmittenberger/ZEEK-TCP-Urgent-Pointer-fork`
 
 Install all [dependencies](https://docs.zeek.org/en/stable/install/install.html#prerequisites) locally.
-Then build and install:
+Then configure build with:
 
-`./configure && make && sudo make install`
+`./configure`
 
-(this may take a while)
+(Optionallly enable ccache (sudo apt install ccache) to speed up recompile, if you are further developing this fork. Optionally enable debug to be able to debug plugins and optionally set a custom install path for the fork:) `./configure --ccache --enable-debug --install-dir=...`
+
+Next build and install:
+
+`make && sudo make install`
+
+(this may take a while the first time)
 
 Development
 -----------
