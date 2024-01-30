@@ -236,7 +236,7 @@ event connection_EOF%(c: connection, is_orig: bool%);
 ##          the packet was not fully captured.
 ##
 ## .. zeek:see:: new_packet packet_contents tcp_option tcp_contents tcp_rexmit
-event tcp_packet%(c: connection, is_orig: bool, flags: string, seq: count, ack: count, len: count, payload: string%);
+event tcp_packet%(c: connection, is_orig: bool, flags: string, seq: count, ack: count, len: count, payload: string, urgent: int%);
 
 ## Generated for each option found in a TCP header. Like many of the ``tcp_*``
 ## events, this is a very low-level event and potentially expensive as it may

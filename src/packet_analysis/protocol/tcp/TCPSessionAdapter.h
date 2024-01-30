@@ -123,7 +123,7 @@ protected:
     void UpdateResetState(int len, analyzer::tcp::TCP_Flags flags);
 
     void GeneratePacketEvent(uint64_t rel_seq, uint64_t rel_ack, const u_char* data, int len, int caplen, bool is_orig,
-                             analyzer::tcp::TCP_Flags flags);
+                             analyzer::tcp::TCP_Flags flags, uint32_t tcp_urgent_pointer);
 
     bool DeliverData(double t, const u_char* data, int len, int caplen, const IP_Hdr* ip, const struct tcphdr* tp,
                      analyzer::tcp::TCP_Endpoint* endpoint, uint64_t rel_data_seq, bool is_orig,
