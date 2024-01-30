@@ -489,11 +489,12 @@ void TCPSessionAdapter::Process(bool is_orig, const struct tcphdr* tp, int len, 
     analyzer::tcp::TCP_Flags flags(tp);
     uint32_t base_seq = ntohl(tp->th_seq);
     uint32_t ack_seq = ntohl(tp->th_ack);
-    uint16_t tcp_urp_CUSTOM = (int)tp->th_urp;
+    // #use ntohs (s=short) beacuse the urgent pointer is 16 bit. If it were 32 bit use ntohl (long = l)
+    // th_urp is the urgent pointer and uint16_t (check standard tcp.h online or on linux on /usr/include/netinet/tcp.h)
+    uint16_t tcp_urp_CUSTOM = ntohs(tp->th_urp);
     uint32_t tcp_hdr_len = data - (const u_char*)tp;
 
-    printf("~Urgent  in zeek: %d\n ", tp->th_urp);
-    printf("~Urgent  in zeek: %d\n ", tcp_urp_CUSTOM);
+    printf("     ~ ntohs Urgent  in zeek: %d\n ", ntohs(tp->th_urp));
 
     analyzer::tcp::TCP_Endpoint* endpoint = is_orig ? orig : resp;
     analyzer::tcp::TCP_Endpoint* peer = endpoint->peer;
