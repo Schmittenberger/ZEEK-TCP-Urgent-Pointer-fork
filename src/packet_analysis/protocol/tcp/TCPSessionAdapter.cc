@@ -489,7 +489,11 @@ void TCPSessionAdapter::Process(bool is_orig, const struct tcphdr* tp, int len, 
     analyzer::tcp::TCP_Flags flags(tp);
     uint32_t base_seq = ntohl(tp->th_seq);
     uint32_t ack_seq = ntohl(tp->th_ack);
+    uint16_t tcp_urp_CUSTOM = (int)tp->th_urp;
     uint32_t tcp_hdr_len = data - (const u_char*)tp;
+
+    printf("~Urgent  in zeek: %d\n ", tp->th_urp);
+    printf("~Urgent  in zeek: %d\n ", tcp_urp_CUSTOM);
 
     analyzer::tcp::TCP_Endpoint* endpoint = is_orig ? orig : resp;
     analyzer::tcp::TCP_Endpoint* peer = endpoint->peer;
@@ -597,7 +601,7 @@ void TCPSessionAdapter::Process(bool is_orig, const struct tcphdr* tp, int len, 
         peer->AckReceived(rel_ack);
 
     if ( tcp_packet )
-        GeneratePacketEvent(rel_seq, rel_ack, data, len, remaining, is_orig, flags);
+        GeneratePacketEvent(rel_seq, rel_ack, data, len, remaining, is_orig, flags, tcp_urp_CUSTOM);
 
     if ( (tcp_option || tcp_options) && tcp_hdr_len > sizeof(*tp) )
         ParseTCPOptions(tp, is_orig);
@@ -966,12 +970,21 @@ void TCPSessionAdapter::UpdateStateMachine(double t, analyzer::tcp::TCP_Endpoint
 }
 
 void TCPSessionAdapter::GeneratePacketEvent(uint64_t rel_seq, uint64_t rel_ack, const u_char* data, int len, int caplen,
-                                            bool is_orig, analyzer::tcp::TCP_Flags flags) {
-    EnqueueConnEvent(tcp_packet, ConnVal(), val_mgr->Bool(is_orig), make_intrusive<StringVal>(flags.AsString()),
-                     val_mgr->Count(rel_seq), val_mgr->Count(flags.ACK() ? rel_ack : 0), val_mgr->Count(len),
-                     // We need the min() here because Ethernet padding can lead to
-                     // caplen > len.
-                     make_intrusive<StringVal>(std::min(caplen, len), (const char*)data));
+                                            bool is_orig, analyzer::tcp::TCP_Flags flags, uint32_t tcp_urgent_pointer) {
+    EnqueueConnEvent(tcp_packet, 
+        ConnVal(), //connection event
+        val_mgr->Bool(is_orig), 
+        make_intrusive<StringVal>(flags.AsString()), //flags
+                        val_mgr->Count(rel_seq), //sequence number
+                        val_mgr->Count(flags.ACK() ? rel_ack : 0), //acknowledgement number
+                        val_mgr->Count(len), //length of TCP payload as specified in packet header
+                        // We need the min() here because Ethernet padding can lead to
+                        // caplen > len.
+                        make_intrusive<StringVal>(std::min(caplen, len), 
+                        (const char*)data),
+                        // val_mgr->Count(tcp_urgent_pointer) // tcp urgent pointer
+                        val_mgr->Int(tcp_urgent_pointer)
+    );
 }
 
 bool TCPSessionAdapter::DeliverData(double t, const u_char* data, int len, int caplen, const IP_Hdr* ip,
